@@ -6,7 +6,6 @@ var moment = require('moment');
 var LineByLineReader = require('line-by-line');
 
 var app = express();
-var test;
 
 
 app.use(bodyParser());
@@ -35,10 +34,10 @@ app.post('/', function(req, res) {
 
         //getting current time
         var time = moment();
-        var formatted = time.format('YYYY-MM-DD HH:mm:ss Z');
+        var timestamp = time.format('YYYY-MM-DD HH:mm:ss Z');
 
         //formatting texts
-        var data = strFormat(formatted)+strFormat(fromMail)+strFormat(toMail)+addBracks(message);
+        var data = strFormat(timestamp)+strFormat(fromMail)+strFormat(toMail)+addBracks(message);
 
         //checking if file exists and appending if it does
         if (exists){fs.appendFile('mail.txt', data+'\r\n', function (err) {
@@ -105,7 +104,7 @@ app.get('/list', function (req, res) {
     var formatted = mailtext.toString();
 
 
-    var html = test+'<br>' + formatted + '<br>' +
+    var html = formatted + '<br>' +
         '<a href="/">Send a mail</a>';
     res.send(html);
 
@@ -129,17 +128,4 @@ function addBracks(string) {
     return newString;
 }
 
-function readFile(filePath) {
 
-
-
-}
-
-function helloCatAsync(callback) {
-    // 3. Start async operation:
-    setTimeout(function() {
-        // 4. Finished async operation,
-        //    call the callback passing the result as argument
-        callback(test);
-    }, Math.random() * 2000);
-}
