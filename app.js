@@ -37,15 +37,13 @@ app.post('/', function(req, res) {
         var timestamp = time.format('YYYY-MM-DD HH:mm:ss Z');
 
         //formatting texts
-        var data = strFormat(timestamp)+strFormat(fromMail)+strFormat(toMail)+addBracks(message);
+        var data = strFormat(timestamp)+strFormat(fromMail)+strFormat(toMail)+addHtmlBreak(addBracks(message));
 
         //checking if file exists and appending if it does
         if (exists){fs.appendFile('mail.txt', data+'\r\n', function (err) {
 
             if(err)
                 throw err;
-            else
-                console.log('file appended');
         });} else {
             fs.writeFile('mail.txt', data, function (err) {
                 if(err){
@@ -104,7 +102,7 @@ app.get('/list', function (req, res) {
     var formatted = mailtext.toString();
 
 
-    var html = formatted + '<br>' +
+    var html = formatted +'<br>' +
         '<a href="/">Send a mail</a>';
     res.send(html);
 
@@ -126,6 +124,10 @@ function strFormat(string) {
 function addBracks(string) {
     var newString = '['+string+']';
     return newString;
+}
+function addHtmlBreak(string) {
+    var text = string + '<br>';
+    return text;
 }
 
 
