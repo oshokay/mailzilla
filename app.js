@@ -5,6 +5,7 @@ var S = require('string');
 var moment = require('moment');
 var LineByLineReader = require('line-by-line');
 
+
 var app = express();
 
 
@@ -27,7 +28,7 @@ app.post('/', function(req, res) {
     /* format = [date and time]---[from email]---[target email address]---[message]*/
 
 
-
+//check if file exists
 
     fs.exists('mail.txt', function (exists) {
 
@@ -37,13 +38,14 @@ app.post('/', function(req, res) {
         var timestamp = time.format('YYYY-MM-DD HH:mm:ss Z');
 
         //formatting texts
-        var data = strFormat(timestamp)+strFormat(fromMail)+strFormat(toMail)+addHtmlBreak(addBracks(message));
+        var data = strFormat(timestamp)+strFormat(fromMail)+strFormat(toMail)+ addBracks(message);
 
         //checking if file exists and appending if it does
         if (exists){fs.appendFile('mail.txt', data+'\r\n', function (err) {
 
             if(err)
                 throw err;
+            //if not create  a new mail.txt
         });} else {
             fs.writeFile('mail.txt', data, function (err) {
                 if(err){
@@ -56,55 +58,27 @@ app.post('/', function(req, res) {
     });
 
 
-
+    //display mail after submitting
     var html =  fromMail + ' you sent  '+ message +' to ' + toMail + '.<br>' +
         '<a href="/">Send Another Mail</a><br><a href="/list">View All Sent Mails</a> ';
     res.send(html);
     console.log('data added');
 
 });
-    
+
 
 app.get('/list', function (req, res) {
 
-    /** Displaying mail data in a sexy way <<uncompleted>>
-     * 
-     * var lr = new LineByLineReader('mail.txt');
-    lr.on('error', function (err) {
-        console.log(err.stack);
-    });
-
-    lr.on('line', function (line) {
-        test = line.toString();
-        console.log(test);
-
-        // 'line' contains the current line without the trailing newline character.
-    });
-
-    lr.on('end', function () {
-        console.log('end of reading');
-    });
-
-    helloCatAsync(function (result) {
 
 
-        console.log(result);
-    })
-**/
-
-
-
-
-
-
-
+    //reading file and sending to html page
     var  mailtext = fs.readFileSync('mail.txt');
     var formatted = mailtext.toString();
-
-
-    var html = formatted +'<br>' +
+    var line = formatted.replace(new RegExp('\r?\n','g'), '<br>');
+    var html = line + '<br>' +
         '<a href="/">Send a mail</a>';
     res.send(html);
+
 
 
 
@@ -128,6 +102,39 @@ function addBracks(string) {
 function addHtmlBreak(string) {
     var text = string + '<br>';
     return text;
+
 }
 
+function displayData(callback) {
+
+
+    lr = new LineByLineReader('mail.txt');
+    var lines =[];
+    lr.on('error', function (err) {
+        // 'err' contains error object
+    });
+
+    lr.on('line', function (line) {
+        // pause emitting of lines...
+
+
+        lines.push(line);
+        lr.pause();
+        callback(lines);
+
+        // ...do your asynchronous line processing..
+        setTimeout(function () {
+
+            // ...and continue emitting lines.
+            lr.resume();
+        }, 100);
+    });
+
+    lr.on('end', function () {
+        callback(lines);
+
+        // All lines are read, file is closed now.
+    });
+
+}
 
